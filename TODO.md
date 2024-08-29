@@ -1,4 +1,15 @@
 # To do:
+## ~~Done~~
+- ~~Acquire dataset~~
+- ~~Create repo~~
+- ~~Create a way to pull the datasets from Google Drive since they won't fit in the repo~~
+- ~~Cleaning:~~
+    - ~~Rename columns~~
+    - ~~Fill null values~~
+    - ~~Put strings in lower case~~
+    - ~~Convert codes from numbers to strings~~
+    - ~~Convert date/time strings to datetime format~~
+    - ~~Remove missing lat/lons~~
 ## Sooner
 - Reduce the following columns down to a small number of categories:
     - crimeCodeDescription
