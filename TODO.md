@@ -1,0 +1,38 @@
+# To do:
+## Sooner
+- Reduce the following columns down to a small number of categories:
+    - crimeCodeDescription
+    - weaponDescription
+    - siteDescription
+
+- EDA/ETL
+- Feature engineering
+## Later
+- Encode the data
+- Balance the dataset
+- Split data into training and testing sets
+- Scale the data
+- Train models
+    - Repeat training for various models, various hyperparameters, find best score
+- Create a presentation
+- (maybe) Write functions to make it all a pipeline
+- (maybe) Create a mock deployment/frontend
+
+# Ideas:
+## Feature Engineering:
+- reportDelay (number of days between the crime and the report)
+- reportTimely (1 if reported within 2 days, otherwise 0)
+- crimeCount (number of crimeCodes used across crimeCode1, 2, 3, and 4)
+- victimSuspectRelationship (1 if victim and suspect know each other, otherwise 0)
+    - this information can be parsed from the moCodes
+- reduce victimAge to categories:
+    - unknown (0)
+    - minor (1-17)
+    - adult (18-59)
+    - senior (60+)
+- reduce victimDescent to other/unknown, black, hispanic, white, asian
+    - or omit this column entirely, especially if it has minimal impact on the model
+- This is a shapefile for Los Angeles districts containing income/poverty data:
+    - https://data.lacounty.gov/datasets/5455a5c504064c38b5ac9638d8580d92/explore?location=34.852000%2C-118.026853%2C7.93
+    - We can match every lat/lon with its corresponding district and populate the income/poverty data for the surrounding area of each crime
+    - We can also count the amount of crimes in each district and use that as a feature to indicate if the crime happened in a high- or low-crime district
