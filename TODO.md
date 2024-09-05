@@ -10,21 +10,21 @@
     - ~~Convert codes from numbers to strings~~
     - ~~Convert date/time strings to datetime format~~
     - ~~Remove missing lat/lons~~
-## Sooner
-- Reduce the following columns down to a small number of categories:
-    - crimeCodeDescription
-    - weaponDescription
-    - siteDescription
-
-- EDA/ETL
-- Feature engineering
-## Later
-- Encode the data
-- Balance the dataset
-- Split data into training and testing sets
-- Scale the data
+- ~~Reduce the following columns down to a small number of categories:~~
+    - ~~crimeCodeDescription~~
+    - ~~weaponDescription~~
+    - ~~siteDescription~~
+- ~~EDA/ETL~~
+- ~~Feature engineering~~
+- ~~Encode the data~~
+- ~~Balance the dataset~~
+- ~~Split data into training and testing sets~~
+- ~~Scale the data~~
+## On deck
 - Train models
     - Repeat training for various models, various hyperparameters, find best score
+
+## Later
 - Create a presentation
 - (maybe) Write functions to make it all a pipeline
 - (maybe) Create a mock deployment/frontend
