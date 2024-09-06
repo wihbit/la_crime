@@ -1,1 +1,98 @@
-# la_crime
+# Los Angeles Crime Arrest Predictions
+
+## Data
+- Los Angeles Crime 2020 - Present: https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8/about_data
+- Los Angeles Crime 2010 - 2020: https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z/about_data
+- Los Angeles District and Income Data: https://data.lacounty.gov/datasets/5455a5c504064c38b5ac9638d8580d92/explore
+
+## Python Packages/Libraries
+- numpy
+- pandas
+- geopandas
+- scikit-learn
+- matplotlib
+- PyPDF2
+
+`pip install numpy pandas geopandas scikit-learn matplotlib PyPDF2`
+
+## Objective
+Given a large set of historical data about crimes recorded in Los Angeles, create a machine learning model to best predict whether a crime will be resolved (arrest or other) or remain under investigation.
+
+## About the data
+Los Angeles has a large collection of publicly available datasets on https://data.lacity.org/, including two crime datasets collectively spanning the last 14 years, with a little over 3 million records. The data, in the form of a CSV, includes the following information:
+- Report ID
+- Date the crime occurred
+- Time the crime occurred
+- Date the report was filed
+- LAPD district
+- Crime codes, crime descriptions
+- Modus operandi codes
+- Victim age, sex, descent
+- Premise codes, premise descriptions
+- Weapon codes, weapon descriptions
+- Location (address, cross streets, latitude, longitude)
+- Status (e.g. investigation continuing, adult arrested, juvenile arrested etc.)
+
+Using the crime data's latitude/longitude data, we brought in a separate geospatial dataset detailing all of LA's district boundaries as polygons, as well as the number of households and median household income for those districts.
+
+## Phase 1: Data Cleaning, EDA, ETL  
+- Crimes, weapons, premises
+    - The raw dataset included 143 unique kinds of crime, 80 unique kinds of weapons, and 321 unique kinds of premises
+    - These were reduced to a few categories:
+        - crimes: violent, property damage, theft, etc.
+        - weapons: bodily, firearms, objects, etc.
+        - premises: public, residential, business, etc.
+    - A prominent method for sorting these into categories was to list out keywords related to each category, and running a script that puts them in that category if those words are found in their descriptions (e.g. ['stolen', 'theft', 'robbery', 'burglary'] -> theft category)
+
+- Columns were renamed for better readability
+- Null values were filled
+- Null values in the target variable (status) were removed
+- All string column were converted to lowercase for consistency
+- Rows with zeroes in latitude and longitude were removed
+
+- 19 unique ethnicities were reduced to 8
+- Ages were reduced to minor, adult, senior, and unknown (the dataset used 0 for unknown/not applicable)
+
+## Phase 2: Feature Engineering
+- Report timeliness:
+    - The number of days elapsed between the crime occuring and the crime being reported
+- Victim/suspect relationship:
+    - Many crimes included modus operandi codes, some of which corresponded to notes on the case indicating the victim and suspect know each other (e.g. family, friends, roommates, coworkers, etc.)
+- Income
+    - With most crimes falling into some city district's polygon, each crime could now include the income level of the surrounding area
+- Crime total / density / arrest ratio
+    - Using the same district polygons, each crime was matched with:
+        - the total amount of crimes to have happened in that district since 2010
+        - the total amount of crimes to have happened in that district 6 months prior
+        - the ratio of crimes per household in that district since 2010
+        - the ratio of crimes per household in that district 6 months prior
+        - the percentage of crimes resulting in arrests in that area since 2010
+
+## Phase 3: Data Preparation
+### Encoding
+Once we were satisfied with data cleaning and feature engineering efforts, we had to encode any remaining non-numeric columns.
+- One-hot encoded: victim age, victim descent, victim sex
+- Ordinal encoded: district income level, crime density level
+### Balancing
+As some already know, most crimes go unsolved. Unsurprisingly, the raw dataset comprises about 77.5% crimes that are in an 'investigation' status, and only about 22.5% crimes that had an arrest. In other words, unresolved crimes outnumber resolved ones about 3.5 to 1.
+We decided it would be best if whatever model we train works with a balanced dataset, so we took equal samples from both classes in the dataset and combined them prior to training.
+### Splitting
+We used an 80/20 train-test split ratio, and used the 'stratify' argument in the train-test-split function to ensure that both training and testing sets include the same ratio of 1s and 0s as are present in the data (1:1).
+### Scaling
+We fit StandardScaler to our training features, and used that to transform the training and testing features
+
+## Phase 4: Modeling
+### Feature Selection
+We used the feature importance attribute in RandomForestClassifier to get an idea of what features were the best candidates for training a model. From there, we selected the top # features, before importance values dropped off significantly. What stood out is that victim data (age, sex, descent) scored very low on importance, as did most weapon and premise categories. The top scoring features were latitude, longitude, crime density, thefts, arrest ratio, violent crimes, physical violence, armed crimes, and crimes in private homes.
+### Training
+We gathered a handful of machine learning models and used iterative testing to get their accuracy scores with different sets of hyperparameters.
+- RandomForestClassifier: tested different criterion and n_estimators arguments
+- SVC (Support Vector Classification): tested different kernels
+- XGBoost
+- AdaBoostClassifier: tested different n_estimators and learning_rate arguments
+- ExtraTreesClassifier: tested different n_estimators arguments
+- GaussianNB
+
+Most scores seem to range between 70% and 75% but we saw the best results out of SVC, AdaBoost, and RandomForest
+### Ensembling
+One method to increase model accuracy is to have multiple models predict on the same data, and use the average of their scores to see what they 'agree' on. This tends to work better when the models involved are all fundamentally different, which isn't really the case here. Nevertheless, ensembling 5 models this way yielded an accuracy of 74.7%, while the best accuracy from a single model in it was 74.1%.
