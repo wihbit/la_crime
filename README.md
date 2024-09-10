@@ -1,5 +1,8 @@
 # Los Angeles Crime Arrest Predictions
 
+## Presentation Slides
+https://docs.google.com/presentation/d/1lA3cuCAJBtnveRd9LGkl-GkJPqvFWRPSqvvNhsI4DLM/edit#slide=id.g2874446bc5d_0_618
+
 ## Data
 - Los Angeles Crime 2020 - Present: https://data.lacity.org/Public-Safety/Crime-Data-from-2020-to-Present/2nrs-mtv8/about_data
 - Los Angeles Crime 2010 - 2020: https://data.lacity.org/Public-Safety/Crime-Data-from-2010-to-2019/63jg-8b9z/about_data
@@ -108,3 +111,9 @@ More detailed scores (F1, precision, recall, etc.) are found in modeling.ipynb
 
 ### Ensembling
 One method to increase model accuracy is to have multiple models predict on the same data, and use the average of their scores to see what they 'agree' on. This tends to work better when the models involved are all fundamentally different, which isn't really the case here. Nevertheless, we experimented with this method, and ensembled our 5 models to see the accuracy of their combined scores. In our case, this method of ensembling did not increase accuracy.
+
+# Conclusions
+
+Feature engineering and ETL was a major factor in improving model performance. The original crime dataset only had age, latitude, and longitude as features that were already numeric. The rest of it had to modified in some way (dates, times, categories, codes). Extracting information hidden in the dataset in the form of codes was necessary, as was getting creative and creating new features from existing features, and from outside datasets.
+
+After testing thousands of hyperparameters, model accuracy hovers around 75-76% across multiple different models. This tells us that we’ve likely reached the limit of what hyperparameter tuning can accomplish with the data as far as accuracy, and that surpassing 76% would probably require more/better features, and some different approaches. Given the human-driven nature of criminology, the true limit of predictability might not be that much higher than 76%. Even with all the public data in the world, there are likely dozens of unseen, unmeasurable factors contributing to the outcome of a criminal investigation.
