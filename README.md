@@ -19,7 +19,7 @@
 Given a large set of historical data about crimes recorded in Los Angeles, create a machine learning model to best predict whether a crime will be resolved (arrest or other) or remain under investigation.
 
 ## About the data
-Los Angeles has a large collection of publicly available datasets on https://data.lacity.org/, including two crime datasets collectively spanning the last 14 years, with a little over 3 million records. The data, in the form of a CSV, includes the following information:
+Los Angeles has a large collection of publicly available datasets on https://data.lacity.org/, including two crime datasets collectively spanning 14 years, with a little over 3 million records. The data, in the form of a CSV, includes the following information:
 - Report ID
 - Date the crime occurred
 - Time the crime occurred
@@ -77,22 +77,34 @@ Once we were satisfied with data cleaning and feature engineering efforts, we ha
 As some already know, most crimes go unsolved. Unsurprisingly, the raw dataset comprises about 77.5% crimes that are in an 'investigation' status, and only about 22.5% crimes that had an arrest. In other words, unresolved crimes outnumber resolved ones about 3.5 to 1.
 We decided it would be best if whatever model we train works with a balanced dataset, so we took equal samples from both classes in the dataset and combined them prior to training.
 ### Splitting
-We used an 80/20 train-test split ratio, and used the 'stratify' argument in the train-test-split function to ensure that both training and testing sets include the same ratio of 1s and 0s as are present in the data (1:1).
+We used scikit-learn's train-test-split function, and used the 'stratify' argument to ensure that both training and testing sets include the same ratio of 1s and 0s as are present in the data (1:1).
 ### Scaling
 We fit StandardScaler to our training features, and used that to transform the training and testing features
 
 ## Phase 4: Modeling
 ### Feature Selection
-We used the feature importance attribute in RandomForestClassifier to get an idea of what features were the best candidates for training a model. From there, we selected the top # features, before importance values dropped off significantly. What stood out is that victim data (age, sex, descent) scored very low on importance, as did most weapon and premise categories. The top scoring features were latitude, longitude, crime density, thefts, arrest ratio, violent crimes, physical violence, armed crimes, and crimes in private homes.
+We used the feature importance attribute in RandomForestClassifier to get an idea of what features were the best candidates for training a model. From there, we selected the top 15 features, before importance values dropped off significantly. What stood out is that victim data (age, sex, descent) scored very low on importance, as did most weapon and premise categories. The top scoring features were relationship, latitude, longitude, crime density, thefts, arrest ratio, violent crimes, physical violence, armed crimes, and crimes in private homes.
 ### Training
-We gathered a handful of machine learning models and used iterative testing to get their accuracy scores with different sets of hyperparameters.
-- RandomForestClassifier: tested different criterion and n_estimators arguments
-- SVC (Support Vector Classification): tested different kernels
-- XGBoost
-- AdaBoostClassifier: tested different n_estimators and learning_rate arguments
-- ExtraTreesClassifier: tested different n_estimators arguments
-- GaussianNB
+We gathered a handful of machine learning models and used GridSearchCV to find an optimal set of hyperparameters for each model. We used accuracy as our primary metric, because our goal is to have as many correct predictions as possible overall, with no special importance placed on either class (1 or 0). Since we balanced the dataset prior to training, we mitigated the risks of getting a skewed model.  
 
-Most scores seem to range between 70% and 75% but we saw the best results out of SVC, AdaBoost, and RandomForest
+Models tested:
+- RandomForestClassifier
+    - Validation accuracy: 0.7529
+    - Entire dataset: 0.7624
+- SVC (Support Vector Classification)
+    - Validation accuracy: 0.7507
+    - Entire dataset: 0.7629
+- XGBoost
+    - Validation accuracy: 0.7531
+    - Entire dataset: 0.7628
+- AdaBoostClassifier
+    - Validation accuracy: 0.744
+    - Entire dataset: 0.7614
+- ExtraTreesClassifier 
+    - Validation accuracy: 0.7516
+    - Entire dataset: 0.7659  
+
+More detailed scores (F1, precision, recall, etc.) are found in modeling.ipynb
+
 ### Ensembling
-One method to increase model accuracy is to have multiple models predict on the same data, and use the average of their scores to see what they 'agree' on. This tends to work better when the models involved are all fundamentally different, which isn't really the case here. Nevertheless, ensembling 5 models this way yielded an accuracy of 74.7%, while the best accuracy from a single model in it was 74.1%.
+One method to increase model accuracy is to have multiple models predict on the same data, and use the average of their scores to see what they 'agree' on. This tends to work better when the models involved are all fundamentally different, which isn't really the case here. Nevertheless, we experimented with this method, and ensembled our 5 models to see the accuracy of their combined scores. In our case, this method of ensembling did not increase accuracy.
